@@ -1,178 +1,126 @@
-import utilities as util
+import utilities.utils as utils
 import argparse
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-def setup_arguments():
-    parser = argparse.ArgumentParser(
-        program='GroupLassoTester',
-        description='Evaluate various solvers for the group LASSO optimization task'
-    )
-    parser.add_argument(
-        '--solvers', '-S', nargs='+', default=['gl_cvx_gurobi', 'gl_cvx_mosek'],
-        help='List of solvers to evaluate. Use `all` to run every solver available. Defaults to [\'gl_cvx_gurobi\', \'gl_cvx_mosek\'].'
-    )
-    parser.add_argument(
-        '--seed', '-RS', default=1, type=int,
-        help='Random seed for generating test data. Default value is 1.'
-    )
-    parser.add_argument(
-        '--plot', '-P', action='store_true',
-        help='Enable plotting of iteration progress. Plots will be generated if this flag is set.'
-    )
-    parser.add_argument(
-        '--log', '-L', default='INFO',
-        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-        help='Set the logging level. Default is INFO.'
-    )
-    parser.add_argument(
-        '--options', '-O', nargs='+', default={}, type=lambda kv: kv.split("="),
-        help='Define test parameters in the format `key=value`. Multiple entries allowed, e.g., `-O solver_opts={\'max_iters\':60} data_params={\'dim_m\':256, \'dim_n\':512}`. Unspecified parameters retain their default settings.'
-    )
-    parser.add_argument(
-        '--compare', '-C', action='store_true',
-        help='Compare optimal solutions between Mosek and Gurobi solvers when this flag is enabled.'
-    )
-    parser.add_argument(
-        '--version', '-V', action='version', version='GroupLassoTester 1.0 2024-11-15'
-    )
-    parser.add_argument(
-        '--showDefaults', '-PDO', action='store_true',
-        help='Print all default option settings.'
-    )
-    return parser.parse_args()
-
-def main():
-    args = setup_arguments()
-    util.logger.setLevel(args.log)
-    
-    if args.showDefaults:
-        util.displayDefaultOptions()
+if __name__ == '__main__':
+    # Set command line arguments
+    parser = argparse.ArgumentParser(prog='Test_group_lasso', description='Test different solvers for group-lasso problem')
+    parser.add_argument('--solvers', '-S', nargs='+', default=['gl_cvx_gurobi', 'gl_cvx_mosek'], help="Specify solver names. Input 'all' to test all solver functions in this project. Default is ['gl_cvx_gurobi', 'gl_cvx_mosek'].")
+    parser.add_argument('--seed', '-RS', default=97006855, type=int, help='Specify random seed for test data. Default is 97006855.')
+    parser.add_argument('--plot', '-P', action='store_true', help='Indicates whether to plot iteration curves. If this parameter is added, plotting will occur.')
+    parser.add_argument('--log', '-L', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Specify log level. Default is INFO.')
+    parser.add_argument('--opts', '-O', nargs='+', default={}, type=lambda kv: kv.split("="), help="Specify parameters for test data in the format 'key=value', can be multiple. For example, '-O gl_ALM_dual={'maxit':60, 'maxit_inn':100} testData={'m'=256, 'n':512}'. Parameters not specified will use default values.")
+    parser.add_argument('--compare', '-C', action='store_true', help='Indicates whether to compare the computed optimal solution with the results from Mosek and Gurobi. If this parameter is added, comparison will be performed.')
+    parser.add_argument('--version', '-V', action='version', version='%(prog)s 1.0 2024-12-10')
+    parser.add_argument('--printDefaultOpts', '-PDO', action='store_true', help='Show all default opts parameters.')
+    args = parser.parse_args()
+    utils.logger.setLevel(args.log)
+    if args.printDefaultOpts:
+        utils.printAllDefaultOpts()
         exit(0)
-    
-    util.logger.debug(f"Received options: {args.options}")
-    if any(len(pair) < 2 for pair in args.options):
-        raise ValueError('Options must follow the "KEY=VALUE" format.')
-    
-    configurations = dict(args.options)
-    
-    if len(args.solvers) == 1 and args.solvers[0].lower() == 'all':
-        args.solvers = util.availableSolvers
-    
-    util.logger.info(f"Solvers under test: {args.solvers}")
-    util.logger.info(f"Configurations: {configurations}")
-    util.logger.info(f"Random seed set to: {args.seed}")
-    util.logger.info(f"Plotting enabled: {args.plot}")
-    util.logger.info(f"Comparison enabled: {args.compare}")
-    util.logger.info(f"Logging level set to: {args.log}")
-    
-    test_params = dict(configurations.get('data_params', {}))
-    test_params['seed'] = args.seed
-    initial_vals, matrix_A, vector_b, regularization_mu, solution_u, exact_f = util.generateTestData(test_params)
-    exact_sparsity = util.calculateSparsity(solution_u)
-    
-    util.logger.debug(f"Exact objective value: {exact_f}")
-    util.logger.debug(f"Exact solution sparsity: {exact_sparsity}")
-    util.logger.info("\n#######==Initiating Solver Tests==#######")
-    
-    results_table = []
-    
-    with open(util.logFileName, "w", encoding='utf-8') as log_file, util.RedirectOutput(stdout=log_file, stderr=log_file):
+    # Process 'opts' parameter
+    utils.logger.debug(f"raw opts: {args.opts}")
+    if any(len(kv) < 2 for kv in args.opts):
+        raise ValueError('opts parameter dictionary must be given in the form "KEY=VALUE"')
+    opts = dict(args.opts)
+    # Process 'solvers' parameter. If it's 'all', replace with all solvers
+    if len(args.solvers) == 1 and str.lower(args.solvers[0]) == 'all':
+        args.solvers = utils.solversCollection
+
+    # Print input parameters
+    utils.logger.info(f"Test solvers: {args.solvers}")
+    utils.logger.info(f"opts: {opts}")
+    utils.logger.info(f"random seed: {args.seed}")
+    utils.logger.info(f"Is plotting?: {args.plot}")
+    utils.logger.info(f"Is comparing?: {args.compare}")
+    utils.logger.info(f"log level: {args.log}")
+
+    # Initialize test data
+    data_options = dict(opts.get('testData', {}))
+    data_options['seed'] = args.seed
+    x0, A, b, mu, u, f_u = utils.testData(data_options)
+    sparsity_u = utils.sparsity(u)
+    utils.logger.debug(f"Objective function value of the exact solution f_u: {f_u}")
+    utils.logger.debug(f"Sparsity of the exact solution sparsity_u: {sparsity_u}")
+    utils.logger.info(f"\n#######==Start all solvers TEST==#######")
+
+    # Test results table
+    table = []
+
+    # Redirect output streams
+    with open(utils.cvxLogsName, "w", encoding='utf-8') as devlog, utils.RedirectStdStreams(stdout=devlog, stderr=devlog):
+        # Process 'compare' parameter
         if args.compare:
-            util.logger.info("\n--->Comparing cvx_mosek and cvx_gurobi Solvers<---")
-            mosek_result = util.runSolver(initial_vals, matrix_A, vector_b, regularization_mu, {'solver': 'gl_cvx_mosek'})
-            gurobi_result = util.runSolver(initial_vals, matrix_A, vector_b, regularization_mu, {'solver': 'gl_cvx_gurobi'})
-            
-            results_table.extend([
-                [
-                    'cvx_mosek', mosek_result['objective'], util.objectiveError(mosek_result['objective'], exact_f),
-                    util.calculateError(mosek_result['solution'], solution_u), 
-                    util.calculateError(mosek_result['solution'], mosek_result['solution']), 
-                    util.calculateError(mosek_result['solution'], gurobi_result['solution']), 
-                    mosek_result['cpu_time'], mosek_result['iterations'], mosek_result['sparsity']
-                ],
-                [
-                    'cvx_gurobi', gurobi_result['objective'], util.objectiveError(gurobi_result['objective'], exact_f),
-                    util.calculateError(gurobi_result['solution'], solution_u), 
-                    util.calculateError(gurobi_result['solution'], mosek_result['solution']), 
-                    util.calculateError(gurobi_result['solution'], gurobi_result['solution']),
-                    gurobi_result['cpu_time'], gurobi_result['iterations'], gurobi_result['sparsity']
-                ]
-            ])
-            
+            utils.logger.info(f"\n--->Compare Solver: cvx_mosek and cvx_gurobi<---")
+            x_mosek, iters_N_mosek, out_mosek = utils.testSolver(x0, A, b, mu, {'solver_name': 'gl_cvx_mosek'})
+            x_gurobi, iters_N_gurobi, out_gurobi = utils.testSolver(x0, A, b, mu, {'solver_name': 'gl_cvx_gurobi'})
+            table.append([
+                'cvx_mosek', out_mosek['fval'], utils.errObj(out_mosek['fval'], f_u),
+                utils.errX(x_mosek, u), utils.errX(x_mosek, x_mosek), utils.errX(x_mosek, x_gurobi),
+                out_mosek['time_cpu'], iters_N_mosek, out_mosek['sparsity_x']])
+            table.append([
+                'cvx_gurobi', out_gurobi['fval'], utils.errObj(out_gurobi['fval'], f_u),
+                utils.errX(x_gurobi, u), utils.errX(x_gurobi, x_mosek), utils.errX(x_gurobi, x_gurobi),
+                out_gurobi['time_cpu'], iters_N_gurobi, out_gurobi['sparsity_x']])
             if args.plot:
-                mosek_iters_x, mosek_iters_y = zip(*mosek_result['iterations_data'])
-                gurobi_iters_x, gurobi_iters_y = zip(*gurobi_result['iterations_data'])
-                plt.plot(mosek_iters_x, mosek_iters_y, '.-', label=f'cvx_mosek ({mosek_result["iterations"]} iterations)')
-                plt.plot(gurobi_iters_x, gurobi_iters_y, '.-', label=f'cvx_gurobi ({gurobi_result["iterations"]} iterations)')
-                util.logger.info("Generated iteration plots for cvx_mosek and cvx_gurobi")
-        
-        for solver in args.solvers:
-            if solver not in util.availableSolvers:
-                util.logger.error(f"Solver {solver} is unavailable. Skipping.")
+                plot_x_mosek, plot_y_mosek = zip(*out_mosek['iters'])
+                plot_x_gurobi, plot_y_gurobi = zip(*out_gurobi['iters'])
+                plt.plot(plot_x_mosek, plot_y_mosek, '.-', label=('cvx_mosek in ' + str(iters_N_mosek) + ' iters'))
+                plt.plot(plot_x_gurobi, plot_y_gurobi, '.-', label=('cvx_gurobi in ' + str(iters_N_gurobi) + ' iters'))
+                utils.logger.info(f"Plot curve for cvx_mosek and cvx_gurobi")
+        # Iterate over each solver to test
+        for solver_name in args.solvers:
+            # Check if solver exists
+            if solver_name not in utils.solversCollection:
+                utils.logger.error(f"Solver {solver_name} does not exist, skipping this solver.")
                 continue
-            if args.compare and solver in ['gl_cvx_gurobi', 'gl_cvx_mosek']:
-                util.logger.info(f"Solver {solver} already evaluated during comparison. Skipping.")
+            # Check if solver has already been tested in compare
+            if args.compare and solver_name in ['gl_cvx_gurobi', 'gl_cvx_mosek']:
+                utils.logger.info(f"Solver {solver_name} has already been tested in compare, skipping this solver.")
                 continue
-            
-            solver_options = dict(configurations.get(solver, {}))
-            solver_options['solver'] = solver
-            result = util.runSolver(initial_vals, matrix_A, vector_b, regularization_mu, solver_options)
-            
-            solution_error = util.calculateError(result['solution'], solution_u)
-            solution_sparsity = util.calculateSparsity(result['solution'])
-            
-            if result['iterations'] in [0, -1]:
-                util.logger.error(
-                    f"{solver} returned {result['iterations']} iterations. Skipping this solver! Check log file {util.logFileName}"
-                )
+            # Test solver
+            solver_opts = dict(opts.get(solver_name, {}))
+            solver_opts['solver_name'] = solver_name
+            x, iters_N, out = utils.testSolver(x0, A, b, mu, solver_opts)
+            # Process the output of the solver
+            err_x_u = utils.errX(x, u)  # Compute error between x and u
+            sparsity_x = utils.sparsity(x)  # Compute sparsity of x
+            if iters_N == 0 or iters_N == -1:
+                utils.logger.error(f"{solver_name}'s iters_N = {iters_N}, skipping this solver! Also need to check stdout redirection and log file {utils.cvxLogsName}")
                 continue
-            
-            iter_x, iter_y = zip(*result['iterations_data'])
-            util.logger.debug(f"Iteration steps count: {len(iter_x)}, Iteration values count: {len(iter_y)}")
-            if iter_y[0] < 0:
-                iter_x = iter_x[1:]
-                iter_y = iter_y[1:]
-            
+            # Plot iteration curves
+            plot_x, plot_y = zip(*out['iters'])
+            utils.logger.debug(f"len(x)={len(plot_x)}")
+            utils.logger.debug(f"len(y)={len(plot_y)}")
+            if plot_y[0] < 0:  # When using Mosek to solve, y[0] may be negative. Remove it here
+                plot_x = plot_x[1:]
+                plot_y = plot_y[1:]
             if args.plot:
-                plt.plot(iter_x, iter_y, '.-', label=f"{solver[3:]} ({result['iterations']} iterations)")
-                util.logger.info(f"Generated iteration plot for {solver}")
-            
+                plt.plot(plot_x, plot_y, '.-', label=(solver_name[3:] + " in " + str(iters_N) + " iters"))
+                utils.logger.info(f"Plot curve for {solver_name}")
+            # Create result comparison table
             if args.compare:
-                results_table.append([
-                    solver[3:], result['objective'], util.objectiveError(result['objective'], exact_f),
-                    solution_error, util.calculateError(result['solution'], mosek_result['solution']),
-                    util.calculateError(result['solution'], gurobi_result['solution']),
-                    result['cpu_time'], result['iterations'], solution_sparsity
-                ])
+                table.append([solver_name[3:], out['fval'], utils.errObj(out['fval'], f_u),
+                              err_x_u, utils.errX(x, x_mosek), utils.errX(x, x_gurobi),
+                              out['time_cpu'], iters_N, sparsity_x])
             else:
-                results_table.append([
-                    solver[3:], result['objective'], util.objectiveError(result['objective'], exact_f),
-                    solution_error, result['cpu_time'], result['iterations'], solution_sparsity
-                ])
-    
-    util.logger.info("\n#######==All Solver Evaluations Completed==#######")
-    util.logger.info(f"Exact Objective Value: {exact_f}")
-    util.logger.info(f"Exact Solution Sparsity: {exact_sparsity}")
-    
-    headers = [
-        'Solver', 'Objective', 'Objective Error', 'Solution Error', 
-        'Time (s)', 'Iterations', 'Sparsity'
-    ]
+                table.append([solver_name[3:], out['fval'], utils.errObj(out['fval'], f_u), err_x_u, out['time_cpu'], iters_N, sparsity_x])
+
+    utils.logger.info(f"\n#######==ALL solvers have finished==#######")
+    utils.logger.info(f"Objective function value of the exact solution f_u: {f_u}")
+    utils.logger.info(f"Sparsity of the exact solution sparsity_u: {sparsity_u}")
     if args.compare:
-        headers = [
-            'Solver', 'Objective', 'Objective Error', 'Solution Error', 
-            'Error vs Mosek', 'Error vs Gurobi', 'Time (s)', 'Iterations', 'Sparsity'
-        ]
-    
-    table_output = tabulate(results_table, headers=headers)
-    util.logger.info("\n" + table_output)
-    print("\n" + table_output)
-    
+        tabulate_headers = ['Solver', 'Objective', 'Obj_ABS_Error', 'x_u_Error', 'x_CVXmosek_Error', 'x_CVXgurobi_Error', 'Time(s)', 'Iter', 'Sparsity']
+    else:
+        tabulate_headers = ['Solver', 'Objective', 'Obj_ABS_Error', 'x_u_Error', 'Time(s)', 'Iter', 'Sparsity']
+    utils.logger.info("\n" + tabulate(table, headers=tabulate_headers))
+    print("\n")
+    print(tabulate(table, headers=tabulate_headers))
     if args.plot:
         plt.yscale('log')
         plt.legend()
         plt.show()
 
-if __name__ == '__main__':
-    main()
+
+        
