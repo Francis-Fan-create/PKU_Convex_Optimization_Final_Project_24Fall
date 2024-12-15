@@ -55,14 +55,8 @@ def gl_ADMM_dual(initial_x: np.ndarray, A: np.ndarray, b: np.ndarray, mu: float,
         # Update dual variable y
         y = inverse_matrix @ (A @ x - sigma * A @ z - b)
         
-        # Store previous z for convergence check
-        previous_z = z.copy()
-        
         # Update primal variable z using the proximal operator
         z = updateZ(x / sigma - A.T @ y, mu)
-        
-        # Calculate the change in z for convergence
-        z_change = np.linalg.norm(z - previous_z, 'fro')
         
         # Update primal variable x
         x = x - sigma * (A.T @ y + z)

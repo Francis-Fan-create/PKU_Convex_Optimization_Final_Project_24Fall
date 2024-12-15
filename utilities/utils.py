@@ -171,7 +171,7 @@ def testSolver(x0, A, b, mu, opts: dict = {}):
         raise ValueError('The opts dictionary must contain the key "solver_name" to specify the solver name')
     # Check if solver exists
     try:
-        solver = getattr(importlib.import_module("src." + solver_name), solver_name)
+        solver = getattr(importlib.import_module("utilities." + solver_name), solver_name)
     except AttributeError:
         logger.error(f"Solver {solver_name} does not exist, skipping this solver.")
         return None, None, None

@@ -1,0 +1,7 @@
+[2024-12-15 10:33:26,224] Test_group_lasso.py: <module>: INFO: Test solvers: ['gl_cvx_mosek', 'gl_cvx_gurobi', 'gl_mosek', 'gl_gurobi', 'gl_SGD_primal', 'gl_ProxGD_primal', 'gl_FProxGD_primal', 'gl_ALM_dual', 'gl_ADMM_dual', 'gl_ADMM_primal']
+[2024-12-15 10:33:26,225] Test_group_lasso.py: <module>: INFO: opts: {}
+[2024-12-15 10:33:26,225] Test_group_lasso.py: <module>: INFO: random seed: 97006855
+[2024-12-15 10:33:26,225] Test_group_lasso.py: <module>: INFO: Is plotting?: True
+[2024-12-15 10:33:26,225] Test_group_lasso.py: <module>: INFO: Is comparing?: False
+[2024-12-15 10:33:26,225] Test_group_lasso.py: <module>: INFO: log level: INFO
+[2024-12-15 10:33:26,225] utils.py: testData: INFO: testData opts: {'seed': 97006855, 'mu': 0.01, 'n': 512, 'm': 256, 'l': 2, 'r': 0.1}
