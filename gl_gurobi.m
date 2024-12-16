@@ -2,7 +2,7 @@ function [X, iter, out] = gl_gurobi(x0, A, b, mu, opts)
     % Initialize model
     [m, n] = size(A);
     l = size(b, 2);
-    addpath('C:\Users\86189\gurobi\win64\matlab');
+    addpath('C:\Users\86189\gurobi\win64\matlab'); % Change to your Gurobi path
     model = struct();
     % variables: x11, x21, ..., xn1, x12, x22, ..., xn2, ..., x1l, x2l, ..., xnl, y11, y21, ..., ym1, y12, y22, ..., ym2, ..., yml, z1, z2, ..., zn
     model.varnames = cell(1, n*l + m*l + n );

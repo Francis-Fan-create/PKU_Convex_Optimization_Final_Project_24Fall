@@ -11,7 +11,7 @@ function [x, iter, out] = gl_mosek(x0, A, b, mu, opts)
     % Note: for MOSEK, x0 is ignored
     [m, n] = size(A);
     l = size(b, 2);
-    addpath('C:\Program Files\Mosek\10.2\toolbox\r2017a');
+    addpath('C:\Program Files\Mosek\10.2\toolbox\r2017a'); % Change to your MOSEK path
     % Prepare the problem structure for MOSEK
     clear prob;
 

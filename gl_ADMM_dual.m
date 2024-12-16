@@ -57,7 +57,7 @@ function [x, iter, output] = gl_ADMM_dual(x0, A, b, mu, opts)
     output.fval = output.prim_hist(end);
 
     % Prepare k history for output
-    output.iters = [ (1:output.iter)', output.prim_hist, output.dual_hist ];
+    output.iters = [ (1:output.iter)', output.prim_hist];
 
     iter = output.iter;
 end
