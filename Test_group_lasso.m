@@ -16,13 +16,12 @@ b = A*u;
 mu = 1e-2;
 
 fig = figure(1);
-subplot(2,1,1); 
 % plot(1:n, u(:,1), '*');
 plot(1:n, u(:,1), '*', 1:n, u(:,2), 'o'); 
 xlim([1 n])
 title('exact solution $u$', 'Interpreter','latex');
 legend('u1', 'u2');
-saveas(fig, '../figures/gl_exact.png');
+saveas(fig, 'figures/gl_exact.png');
 close;
 
 x0 = randn(n, l);
@@ -133,26 +132,26 @@ fprintf('   ADMM Primal: cpu: %5.2f, iter: %5d, optval: %6.5E, sparisity: %4.3f,
 % fprintf('      PPA dual: cpu: %5.2f, iter: %5d, optval: %6.5E, sparisity: %4.3f, err-to-exact: %3.2E, err-to-cvx-mosek: %3.2E, err-to-cvx-gurobi: %3.2E.\n', t13, iter13, out13.fval, sparisity(x13), errfun_exact(x13), errfun(x1, x13), errfun(x2, x13));
 % fprintf('    BCD primal: cpu: %5.2f, iter: %5d, optval: %6.5E, sparisity: %4.3f, err-to-exact: %3.2E, err-to-cvx-mosek: %3.2E, err-to-cvx-gurobi: %3.2E.\n', t14, iter14, out14.fval, sparisity(x14), errfun_exact(x14), errfun(x1, x14), errfun(x2, x14));
 
-plot_results('CVX-Mosek', '../figures/gl_cvx_mosek.png', out1)
-plot_results('CVX-Gurobi', '../figures/gl_cvx_gurobi.png', out2)
+plot_results('CVX-Mosek', 'figures/gl_cvx_mosek.png', out1)
+plot_results('CVX-Gurobi', 'figures/gl_cvx_gurobi.png', out2)
 
-plot_results('Mosek', '../figures/gl_mosek.png', out3)
-plot_results('Gurobi', '../figures/gl_gurobi.png', out4)
+plot_results('Mosek', 'figures/gl_mosek.png', out3)
+plot_results('Gurobi', 'figures/gl_gurobi.png', out4)
 
-plot_results('SGD Primal', '../figures/gl_SGD_Primal.png', out5)
-% plot_results('GD Primal', '../figures/gl_GD_primal.png', out6)
+plot_results('SGD Primal', 'figures/gl_SGD_Primal.png', out5)
+% plot_results('GD Primal', 'figures/gl_GD_primal.png', out6)
 
-% plot_results('FGD Primal', '../figures/gl_FGD_primal.png', out7)
-plot_results('ProxGD Primal', '../figures/gl_ProxGD_primal.png', out8)
-plot_results('FProxGD Primal', '../figures/gl_FProxGD_primal.png', out9)
+% plot_results('FGD Primal', '.figures/gl_FGD_primal.png', out7)
+plot_results('ProxGD Primal', 'figures/gl_ProxGD_primal.png', out8)
+plot_results('FProxGD Primal', 'figures/gl_FProxGD_primal.png', out9)
 
-plot_results('ALM Dual', '../figures/gl_ALM_dual.png', out10)
-plot_results('ADMM Dual', '../figures/gl_ADMM_dual.png', out11)
-plot_results('ADMM Primal', '../figures/gl_ADMM_primal.png', out12)
+plot_results('ALM Dual', 'figures/gl_ALM_dual.png', out10)
+plot_results('ADMM Dual', 'figures/gl_ADMM_dual.png', out11)
+plot_results('ADMM Primal', 'figures/gl_ADMM_primal.png', out12)
 
-% plot_results('PPA Dual', '../figures/gl_PPA_dual.png', out13)
-% plot_results('BCD Prlmal;', '../figures/BCD_primal.png', out14)
+% plot_results('PPA Dual', 'figures/gl_PPA_dual.png', out13)
+% plot_results('BCD Prlmal;', 'figures/BCD_primal.png', out14)
 
-plot_in_one('Group Lasso', '../figures/gl_compare.png', out1, out2, out3, out4, out5, out8, out9, out10, out11, out12)
+plot_in_one('Group Lasso', 'figures/gl_compare.png', out1, out2, out3, out4, out5, out8, out9, out10, out11, out12)
 
 
