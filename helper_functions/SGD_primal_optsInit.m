@@ -1,10 +1,5 @@
 function opts = SGD_primal_optsInit(opts0)
     % Initialize options for Stochastic g Descent (SGD) with default values
-    
-    if nargin < 1
-        opts0 = struct(); % Default input if no argument is provided
-    end
-    
     % General options
     opts.maxit = get_field(opts0, 'maxit', 50); % Maximum number of ks for the continuation strategy
     opts.maxit_inn = get_field(opts0, 'maxit_inn', 250); % Maximum number of ks for the inner loop
@@ -14,7 +9,7 @@ function opts = SGD_primal_optsInit(opts0)
     opts.etaf = get_field(opts0, 'etaf', 0.1); % Reduction factor for ftol at each outer loop k
     
     opts.gtol = get_field(opts0, 'gtol', 1e-6); % Stopping criterion based on g norm
-    opts.gtol_init_ratio = get_field(opts0, 'gtol_init_ratio', 1 / opts.gtol); % Initial scaling factor for gtol
+    opts.gtol_init_ratio = get_field(opts0, 'gtol_init_ratio', 1 ./ opts.gtol); % Initial scaling factor for gtol
     opts.etag = get_field(opts0, 'etag', 0.1); % Reduction factor for gtol at each outer loop k
     
     opts.factor = get_field(opts0, 'factor', 0.1); % Decay rate for the regularization coefficient

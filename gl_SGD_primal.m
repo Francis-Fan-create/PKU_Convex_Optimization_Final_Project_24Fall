@@ -1,80 +1,9 @@
-function [x, ks, output] = gl_SGD_primal(x0, A, b, mu, opts)
+function [x, ks, output] = gl_SGD_primal(x0, A, b, mu, opts_out)
     % sub_g method for the primal problem.
     % - Minimize (1/2)*||Ax - b||_2^2 + mu*||x||_{1,2}
     % - A is m x n, b is m x l, x is n x l
-    opts = SGD_primal_optsInit(opts);
-    opts.method = @gl_SGD_primal_inner;
-    [x, ks, output] = LASSO_group_con(x0, A, b, mu, opts);
+    opts_out = SGD_primal_optsInit(opts_out);
+    opts_out.method = @gl_SGD_primal_inner;
+    [x, ks, output] = LASSO_group_con(x0, A, b, mu, opts_out);
 end
 
-function [x, iter, output] = gl_SGD_primal_inner(x0, A, b, mu, opts)
-    % Inner function for the sub_g Method to solve the group LASSO problem.
-    opts = optsInnerInit(opts);
-    
-    mu0 = opts.mu0;  % Target minimum mu0
-    alpha = opts.alpha0;  % Initial step size
-    
-    % Initial computation
-    x = x0;
-    r = A * x - b;
-    g = A' * r;
-    norm_x = vecnorm(x, 2, 2);
-    sub_g = x ./ ((norm_x <= 1e-6) + norm_x);
-    sub_g = sub_g * mu + g;
-    nrmG = norm(g, 'fro');
-    tmp = 0.5 * norm(r, 'fro')^2;
-    Cval = tmp + mu * sum(vecnorm(x, 2, 2));
-    f = tmp + mu0 * sum(vecnorm(x, 2, 2));
-    
-    output = outInit();
-    
-    for k = 1:opts.maxit_inn
-        gp = g;
-        xp = x;
-        
-        output.g_hist = [output.g_hist; nrmG];
-        output.f_hist_inner = [output.f_hist_inner; f];
-        
-        % Check for convergence
-        if k > 3 && abs(output.f_hist_inner(end) - output.f_hist_inner(end-1)) < opts.ftol
-            output.flag = true;
-            break;
-        end
-        
-        % Line search
-        for nls = 1:10
-            x = xp - alpha * sub_g;
-            tmp = 0.5 * norm(A * x - b, 'fro')^2;
-            tmpf = tmp + mu * sum(vecnorm(x, 2, 2));
-            
-            if tmpf <= Cval - 0.5 * alpha * opts.rhols * nrmG^2
-                break;
-            end
-            alpha = alpha * opts.eta;
-        end
-        
-        % Update gs after x update
-        g = A' * (A * x - b);
-        norm_x = vecnorm(x, 2, 2);
-        norm_x = reshape(norm_x, [], 1);
-        sub_g = x ./ ((norm_x <= 1e-6) + norm_x);
-        sub_g = sub_g * mu + g;
-        
-        % Update function value
-        f = tmp + mu0 * sum(vecnorm(x, 2, 2));
-        
-        % Update g norm
-        nrmG = norm(g, 'fro');
-        
-        Qp = opts.Q;
-        opts.Q = opts.gamma * Qp + 1;
-        Cval = (opts.gamma * Qp * Cval + tmpf) / opts.Q;
-        
-        % Barzilai-Borwein (BB) step size update
-        alpha = BBupdate(x, xp, g, gp, k, alpha);
-    end
-    
-    output.iter = k ;
-    iter = k ;
-end
-    
