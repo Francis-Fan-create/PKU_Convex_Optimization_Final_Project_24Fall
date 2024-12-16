@@ -4,6 +4,7 @@ function plot_in_one(title, filename, varargin)
     for i = 1:length(varargin)
         out = varargin{i};
         if out.iter == -1
+            fprintf('Solver Name: %s\n', title);
             fprintf('The solver did provide error history.\n');
         else
             plot_x = out.iters(:,1);
@@ -16,6 +17,6 @@ function plot_in_one(title, filename, varargin)
     xlabel('Iteration');
     ylabel('Objective Value');
     set(gca, 'YScale', 'log');
-    legend('CVX-Mosek', 'CVX-Gurobi', 'Mosek', 'Gurobi', 'SGD Primal', 'ProxGD Primal', 'FProxGD Primal', 'ALM Dual', 'ADMM Dual', 'ADMM Primal');
+    legend('SGD Primal', 'ProxGD Primal', 'FProxGD Primal', 'ALM Dual', 'ADMM Dual', 'ADMM Primal', 'Location', 'northeast');
     saveas(gcf, filename);
 end
