@@ -25,6 +25,9 @@ function [x, iter, out] = gl_mosek(x0, A, b, mu, opts)
     prob.a = sparse([kron(eye(l), A), -eye(m * l), zeros(m * l, 1), zeros(m * l, n)]);
     prob.blc = b(:);
     prob.buc = b(:);
+    prob.bux = inf * ones(n * l  + m*l + n + 1, 1);
+    prob.blx = -inf * ones(n * l  + m*l + n + 1, 1);
+    prob.blx(end-n:end) = 0; % Bounds on z
 
     % Add quadratic cone constraint 1: [1+t;2*vec(y);1-t] in Q
     % FQ1 * [vec(x);vec(y);t;z] + gQ1 = [1+t;2*vec(y);1-t] in Q
@@ -38,18 +41,18 @@ function [x, iter, out] = gl_mosek(x0, A, b, mu, opts)
     prob.g = [gQ1];
     prob.accs = [cQ1];
 
-    % Add quadratic cone constraint 2: [z;vec(x(i,:).T)] in Q for i=1,...,n
-    % FQ2_i * [vec(x);vec(y);t;z] + gQ2_i = [z;vec(x(i,:).T)] in Q
+    % Add quadratic cone constraint 2: [z;vec(x(i,:))] in Q for i=1,...,n
+    % Let x_i has x(i,:) as its i-th row and 0 elsewhere
+    % FQ2_i * [vec(x);vec(y);t;z] + gQ2_i = [z;vec(x_i)] in Q
     for i=1:n
-        elementary = [];
-        for j=1:l
-            elementary_j = zeros(l,n);
-            elementary_j(j,i) = 1;
-            elementary = [elementary elementary_j];
-        end
-        gQ2_i = zeros(n+l, 1);
-        FQ2_i = sparse([zeros(n,n*l+m*l+1) eye(n); elementary zeros(l,m*l+1+n)]);
-        cQ2_i = [res.symbcon.MSK_DOMAIN_QUADRATIC_CONE n+l];
+        elementary_i = zeros(n,n);
+        elementary_i(i,i) = 1;
+        elementary_i_diag_cat = kron(eye(l), elementary_i);
+        elementary_i_upper = zeros(n,n);
+        elementary_i_upper(1,i) = 1;
+        gQ2_i = zeros(n+n*l, 1);
+        FQ2_i = sparse([zeros(n,n*l+m*l+1) elementary_i_upper; elementary_i_diag_cat zeros(n*l,m*l+1+n)]);
+        cQ2_i = [res.symbcon.MSK_DOMAIN_QUADRATIC_CONE n+n*l];
         prob.f = [prob.f; FQ2_i];
         prob.g = [prob.g; gQ2_i];
         prob.accs = [prob.accs cQ2_i];
