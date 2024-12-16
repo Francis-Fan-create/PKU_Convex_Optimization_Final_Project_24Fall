@@ -5,25 +5,25 @@ A matlab implementation of the group LASSO problem at Optimization Methods taugh
 
 Consider group LASSO problem
 
-$$
+\[
 \min_{x\in\mathbb{R}^{n\times l}}\quad\frac{1}{2}\|Ax-b\|_F^2+\mu\|x\|_{1,2}
-$$
+\]
 
 Here:
 
-$$
+\[
 \begin{align}
 A&\in\mathbb{R}^{m\times n}\\
 b&\in\mathbb{R}^{m\times l}\\
 \mu&>0
 \end{align}
-$$
+\]
 
 and that
 
-$$
+\[
 \|x\|_{1,2}=\sum_{i=1}^n\|x(i,1:l)\|_2.
-$$
+\]
 
 where $x(i,1:l),1\leq i\leq n$ is the $i$-th row of matrix $x$.
 
@@ -35,7 +35,7 @@ where $x(i,1:l),1\leq i\leq n$ is the $i$-th row of matrix $x$.
 
 ## Result Overview
 
-![gl_compare](figures\gl_compare.png)
+![gl_compare](figures/gl_compare.png)
 
 | Method         | CPU   | Iter | Optval      | Sparsity | Err-to-Exact | Err-to-CVX-Mosek | Err-to-CVX-Gurobi |
 | -------------- | ----- | ---- | ----------- | -------- | ------------ | ---------------- | ----------------- |
