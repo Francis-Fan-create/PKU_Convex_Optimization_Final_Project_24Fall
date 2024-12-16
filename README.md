@@ -1,9 +1,9 @@
 # PKU_Convex_Optimization_Final_Project_24
-A matlab implementation of the group LASSO problem at Optimization Methods taught by Zaiwen Wen at PKU, 24 Fall.
+A Matlab implementation of the group LASSO problem at Optimization Methods taught by Zaiwen Wen at PKU, 24 Fall.
 
 ## Problem Formulation
 
-Consider group LASSO problem
+Consider the group LASSO problem
 
 ```math
 \min_{x\in\mathbb{R}^{n\times l}}\quad\frac{1}{2}\|Ax-b\|_F^2+\mu\|x\|_{1,2}
@@ -30,8 +30,9 @@ where $x(i,1:l),1\leq i\leq n$ is the $i$-th row of matrix $x$.
 ## Usage
 
 1. Change the working dir to this repo
-1. Change the Gurobi/Mosek dir in `gl_gurobi.m`/`gl_mosek.m` to your own correspondingly
-2. Run `Test_group_lasso.m`
+2. Add path to `helper_functions` in Matlab, and save path
+3. Change the Gurobi/Mosek dir in `gl_gurobi.m`/`gl_mosek.m` to your own correspondingly
+4. Run `Test_group_lasso.m`
 
 ## Result Overview
 
