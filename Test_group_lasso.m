@@ -138,7 +138,7 @@ plot_results('CVX-Gurobi', 'figures/gl_cvx_gurobi.png', out2)
 plot_results('Mosek', 'figures/gl_mosek.png', out3)
 plot_results('Gurobi', 'figures/gl_gurobi.png', out4)
 
-plot_results('SGD Primal', 'figures/gl_SGD_Primal.png', out5)
+plot_results('SGD Primal', 'figures/gl_SGD_primal.png', out5)
 % plot_results('GD Primal', 'figures/gl_GD_primal.png', out6)
 
 % plot_results('FGD Primal', '.figures/gl_FGD_primal.png', out7)
