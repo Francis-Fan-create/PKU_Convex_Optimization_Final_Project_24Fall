@@ -8,6 +8,7 @@ ss = RandStream('mt19937ar','Seed',seed);
 RandStream.setGlobalStream(ss);
 n = 512;
 m = 256;
+A = randn(m,n);
 k = round(n*0.1); l = 2;
 A = randn(m,n);
 p = randperm(n); p = p(1:k);
